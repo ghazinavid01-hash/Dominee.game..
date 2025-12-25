@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Fish Eat Fish Game</title>
+<style>
+body {
+  margin: 0;
+  background: #0a2a43;
+  overflow: hidden;
+}
+canvas {
+  display: block;
+}
+#score {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: white;
+  font-size: 20px;
+}
+</style>
+</head>
+<body>
+
+<div id="score">Score: 0</div>
+<canvas id="game"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let score = 0;
+
+let player = {
+  x: canvas.width / 2,
+  y: canvas.height / 2,
+  size: 15,
+  speed: 3
+};
+
+let fishes = [];
+
+function createFish() {
+  let size = Math.random() * 25 + 5;
+  fishes.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: size,
+    speed: Math.random() * 1 + 0.5
+  });
+}
+
+for (let i = 0; i < 25; i++) createFish();
+
+document.addEventListener("mousemove", e => {
+  player.x += (e.clientX - player.x) * 0.05;
+  player.y += (e.clientY - player.y) * 0.05;
+});
+
+function drawFish(fish, color) {
+  ctx.beginPath();
+  ctx.arc(fish.x, fish.y, fish.size, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawFish(player, "yellow");
+
+  fishes.forEach((fish, index) => {
+    fish.x += Math.random() * fish.speed - fish.speed / 2;
+    fish.y += Math.random() * fish.speed - fish.speed / 2;
+
+    drawFish(fish, fish.size < player.size ? "green" : "red");
+
+    let dx = player.x - fish.x;
+    let dy = player.y - fish.y;
+    let dist = Math.sqrt(dx * dx + dy * dy);
+
+    if (dist < player.size + fish.size) {
+      if (player.size > fish.size) {
+        score++;
+        player.size += 0.5;
+        fishes.splice(index, 1);
+        createFish();
+      } else {
+        alert("Game Over! Score: " + score);
+        location.reload();
+      }
+    }
+  });
+
+  document.getElementById("score").innerText = "Score: " + score;
+  requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+</body>
+</html>
